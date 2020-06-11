@@ -1,28 +1,35 @@
 import { fetchData } from './fetch-data';
-// import { writeFileSync, readFileSync } from 'fs';
-// import { resolve } from 'path';
+import { Store } from './store';
+import { HtmlPaser } from './html-parter';
+import { WARN, ERROR, INFO } from './log';
 
-interface ProcessOptions{}
+interface ProcessOptions{
+    outputPath: string;
+    existPath: string;
+    url: string;
+}
 
-export async function init(options?: ProcessOptions) {
-    let htmlContent = await fetchData();
-    
-    // start your code here
-    console.log(htmlContent);
+export async function init(options: ProcessOptions) {
+    let htmlContent = await fetchData(options.url).catch(err => {
+        throw new Error(ERROR.NetworkError);
+    });
 
-    if (false) {
+    let itemList = new HtmlPaser(htmlContent).getItemList();
+    let store = new Store(options.existPath);
+    let newItemList = store.merge(itemList);
+    if (newItemList.length > 0) {
         getcha();
+        console.log(newItemList.length + '条');
+        // update store
+        await store.save();
+        // save newItem to output
+        new Store(options.outputPath).save(newItemList);
     } else {
-        console.log('未能找到！');
+        throw new Error(WARN.EmptyResult);
     }
+    // start your code here
 }
 
 function getcha() {
-    console.log('发现了新增内容！');
+    console.log(INFO.NewResult);
 }
-
-// 以下是读写文件示例，__dirname指的是当前文件的工作目录
-// writeFileSync('../log/test.log', '测试文本');
-// const txt = readFileSync('.../log/test.log');
-// const filePath = resolve(__dirname, '../log/test.log');
-// console.log(filePath, txt);
