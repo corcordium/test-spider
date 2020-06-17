@@ -2,7 +2,7 @@ import { fetchData } from './fetch-data';
 import { writeFileSync, readFileSync } from 'fs';
 import { writeLog } from './log';
 import { processData } from './process-data';
-// import { resolve } from 'path';
+import { saveData } from './save-data';
 
 interface ProcessOptions{
     fetchUrl: string;
@@ -17,8 +17,7 @@ export async function init(options?: ProcessOptions) {
     let newArr:any[] = [];
 
     if (data === '') {
-        saveNewData(htmlContent);
-        saveCurData(htmlContent);
+        saveData(htmlContentArr);
     } else {
         newArr = processData(oldData, htmlContentArr);
         
@@ -27,8 +26,13 @@ export async function init(options?: ProcessOptions) {
         } else {
             const newStr = newArr.join('\n');
             const allStr = htmlContent + '\n' + newStr;
-            saveNewData(newStr);
-            saveCurData(allStr);
+            saveData([{
+                type: 'new',
+                data: newStr
+            }, {
+                type: 'cur',
+                data: allStr
+            }]);
             getcha();
         }
     }
@@ -36,12 +40,4 @@ export async function init(options?: ProcessOptions) {
 
 function getcha() {
     console.log('发现了新增内容！');
-}
-
-function saveCurData (data) {
-    writeFileSync('data/existence.data', data);
-}
-
-function saveNewData (data) {
-    writeFileSync('data/output.data', data);
 }
