@@ -1,19 +1,37 @@
 import { fetchData } from './fetch-data';
-// import { writeFileSync, readFileSync } from 'fs';
+import { writeFileSync, readFileSync } from 'fs';
+import { writeLog } from './log';
+import { processData } from './process-data';
 // import { resolve } from 'path';
 
-interface ProcessOptions{}
+interface ProcessOptions{
+    fetchUrl: string;
+    logFile: string;
+}
 
 export async function init(options?: ProcessOptions) {
-    let htmlContent = await fetchData();
-    
-    // start your code here
-    console.log(htmlContent);
+    let htmlContent = await fetchData(options.fetchUrl);
+    const data = readFileSync('data/output.data').toString();
+    const oldData = readFileSync('data/existence.data').toString();
+    const htmlContentArr = htmlContent.split('\n');
+    const dataArr = oldData.split('\n');
+    let newArr:any[] = [];
 
-    if (false) {
-        getcha();
+    if (data === '') {
+        saveNewData(htmlContent);
+        saveCurData(htmlContent);
     } else {
-        console.log('未能找到！');
+        newArr = processData(oldData, htmlContentArr);
+        
+        if (newArr.length === 0) {
+            writeLog(options.logFile, '未能找到！');
+        } else {
+            const newStr = newArr.join('\n');
+            saveNewData(newStr);
+            const allStr = htmlContent + '\n' + newStr;
+            saveCurData(allStr);
+            getcha();
+        }
     }
 }
 
@@ -21,8 +39,10 @@ function getcha() {
     console.log('发现了新增内容！');
 }
 
-// 以下是读写文件示例，__dirname指的是当前文件的工作目录
-// writeFileSync('../log/test.log', '测试文本');
-// const txt = readFileSync('.../log/test.log');
-// const filePath = resolve(__dirname, '../log/test.log');
-// console.log(filePath, txt);
+function saveCurData (data) {
+    writeFileSync('data/existence.data', data);
+}
+
+function saveNewData (data) {
+    writeFileSync('data/output.data', data);
+}
