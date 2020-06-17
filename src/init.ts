@@ -12,9 +12,8 @@ interface ProcessOptions{
 export async function init(options?: ProcessOptions) {
     let htmlContent = await fetchData(options.fetchUrl);
     const data = readFileSync('data/output.data').toString();
-    const oldData = readFileSync('data/existence.data').toString();
+    const oldData = readFileSync('data/existence.data').toString().split('\n');
     const htmlContentArr = htmlContent.split('\n');
-    const dataArr = oldData.split('\n');
     let newArr:any[] = [];
 
     if (data === '') {
@@ -27,8 +26,8 @@ export async function init(options?: ProcessOptions) {
             writeLog(options.logFile, '未能找到！');
         } else {
             const newStr = newArr.join('\n');
-            saveNewData(newStr);
             const allStr = htmlContent + '\n' + newStr;
+            saveNewData(newStr);
             saveCurData(allStr);
             getcha();
         }
