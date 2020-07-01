@@ -1,43 +1,31 @@
-import { fetchData } from './fetch-data';
-import { writeFileSync, readFileSync } from 'fs';
-import { writeLog } from './log';
-import { processData } from './process-data';
-import { saveData } from './save-data';
+/**
+ * @file: init.ts
+ * @description 初始化
+ */
 
-interface ProcessOptions{
-    fetchUrl: string;
-    logFile: string;
-}
+import { fetchData } from './fetch-data';
+import { readFileSync } from 'fs';
+import { processData } from './process-data';
+import { saveDiffData } from './save-data';
+import { ProcessOptions } from './types/process-options';
+import { writeLog } from './log';
+import { parser } from './parser/parser';
 
 export async function init(options?: ProcessOptions) {
-    let htmlContent = await fetchData(options.fetchUrl);
-    const data = readFileSync('data/output.data').toString();
-    const oldData = readFileSync('data/existence.data').toString().split('\n');
-    const htmlContentArr = htmlContent.split('\n');
-    let newArr:any[] = [];
+    let fetchText = await fetchData(options.fetchUrl);
+
+    if (!fetchData) {
+        writeLog(options.logFile, '接口获取数据异常');
+    }
+
+    const data = readFileSync(options.outputFile).toString();
+    const oldDataList = parser(options.type, readFileSync(options.existenceFile).toString(), options);
+    const fetchDataList = parser(options.type, fetchText, options);
 
     if (data === '') {
-        saveData(htmlContentArr);
+        saveDiffData([fetchText], options);
     } else {
-        newArr = processData(oldData, htmlContentArr);
-        
-        if (newArr.length === 0) {
-            writeLog(options.logFile, '未能找到！');
-        } else {
-            const newStr = newArr.join('\n');
-            const allStr = htmlContent + '\n' + newStr;
-            saveData([{
-                type: 'new',
-                data: newStr
-            }, {
-                type: 'cur',
-                data: allStr
-            }]);
-            getcha();
-        }
+        let newArr: string[] = processData(oldDataList, fetchDataList);
+        saveDiffData([newArr, data], options);
     }
-}
-
-function getcha() {
-    console.log('发现了新增内容！');
 }

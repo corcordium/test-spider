@@ -9,8 +9,7 @@
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
-    "esModuleInterop": true,
-    "types": ["./src/types"]
+    "esModuleInterop": true
   },
   "exclude": ["node_modules", "server"]
 }

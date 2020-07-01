@@ -1,3 +1,8 @@
+/**
+ * @file: fetch-data.ts
+ * @description 获取接口数据
+ */
+
 import fetch from 'xfetch';
 
 export async function fetchData(fetchUrl) {

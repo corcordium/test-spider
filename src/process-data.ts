@@ -1,23 +1,21 @@
-export function processData(old, data) {
-    let list = [];
-    if (isObject && data.list) {
-        list = data.list;
-    } else {
-        list = data;
-    }
-    return getNewArr(old, list);
+/**
+ * @file: process-data.ts
+ * @description 数据处理
+ */
+
+export function processData(old:string[], data:string[]) {
+    if (!old.length) return data;
+    if (!data.length) return [];
+
+    return getChangedList(old, data);
 }
 
-function getNewArr(old, list) {
-    let newArr = [];
-    list.forEach((item, index) => {
+function getChangedList(old:string[], list:string[]) {
+    let changedList = [];
+    list.forEach((item) => {
         if (old.indexOf(item) === -1) {
-            newArr.push(item);
+            changedList.push(item);
         }
     });
-    return newArr;
-}
-
-function isObject (data) {
-    return typeof data === 'object' ? true : false;
+    return changedList;
 }
